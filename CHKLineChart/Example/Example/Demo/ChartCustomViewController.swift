@@ -560,6 +560,7 @@ extension ChartCustomViewController {
         style.backgroundColor = UIColor(hex: styleParam.backgroundColor)
         style.isInnerYAxis = styleParam.isInnerYAxis
         
+        
         if styleParam.showYAxisLabel == "Left" {
             style.showYAxisLabel = .left
             style.padding = UIEdgeInsets(top: 16, left: 0, bottom: 4, right: 8)
@@ -571,6 +572,8 @@ extension ChartCustomViewController {
         }
     
         style.algorithms.append(CHChartAlgorithm.timeline)
+        style.showYAxisSelectedLabel = CHYAxisSelectedLabelPosition.top
+        style.showXAxisSelectedLabel = CHXAxisSelectedLabelPosition.right
         
         /************** 配置分区样式 **************/
         

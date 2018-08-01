@@ -23,6 +23,18 @@ public enum CHYAxisShowPosition {
     case left, right, none
 }
 
+public enum CHYAxisSelectedLabelPosition {
+    case top
+    case bottom
+    case none
+}
+
+public enum CHXAxisSelectedLabelPosition {
+    case left
+    case right
+    case none
+}
+
 /// 坐标轴辅助线样式风格
 ///
 /// - none: 不显示

@@ -173,6 +173,8 @@ open class CHKLineChartView: UIView {
     open var handlerOfAlgorithms: [CHChartAlgorithmProtocol] = [CHChartAlgorithmProtocol]()
     open var padding: UIEdgeInsets = UIEdgeInsets.zero    //内边距
     open var showYAxisLabel = CHYAxisShowPosition.right      //显示y的位置，默认右边
+    open var showYAxisSelectedLabel = CHYAxisSelectedLabelPosition.none
+    open var showXAxisSelectedLabel = CHXAxisSelectedLabelPosition.none
     open var isInnerYAxis: Bool = false                     // 是否把y坐标内嵌到图表中
     open var selectedPosition: CHChartSelectedPosition = .onClosePrice         //选中显示y值的位置
 
@@ -270,6 +272,8 @@ open class CHKLineChartView: UIView {
             self.textColor = self.style.textColor
             self.labelFont = self.style.labelFont
             self.showYAxisLabel = self.style.showYAxisLabel
+            self.showYAxisSelectedLabel = self.style.showYAxisSelectedLabel
+            self.showXAxisSelectedLabel = self.style.showXAxisSelectedLabel
             self.selectedBGColor = self.style.selectedBGColor
             self.selectedTextColor = self.style.selectedTextColor
             self.isInnerYAxis = self.style.isInnerYAxis
@@ -574,6 +578,13 @@ open class CHKLineChartView: UIView {
                     self.selectedYAxisLabel?.isHidden = true
                 }
                 self.selectedYAxisLabel?.text = String(format: format, yVal)     //显示实际值
+                //
+                if self.showXAxisSelectedLabel == .left {
+                    yAxisStartX = section!.frame.origin.x
+                } else if self.showXAxisSelectedLabel == .right {
+                    yAxisStartX = section!.frame.maxX - self.yAxisLabelWidth
+                }
+                //
                 self.selectedYAxisLabel?.frame = CGRect(x: yAxisStartX, y: vy - self.labelSize.height / 2, width: self.yAxisLabelWidth, height: self.labelSize.height)
                 let time = Date.ch_getTimeByStamp(item.time, format: "yyyy-MM-dd HH:mm") //显示实际值
                 let size = time.ch_sizeWithConstrained(self.labelFont)
@@ -588,8 +599,15 @@ open class CHKLineChartView: UIView {
                 } else if x + labelWidth > section!.frame.origin.x + section!.frame.size.width {
                     x = section!.frame.origin.x + section!.frame.size.width - labelWidth
                 }
-                
-                self.selectedXAxisLabel?.frame = CGRect(x: x, y: showXAxisSection.frame.maxY, width: size.width  + 6, height: self.labelSize.height)
+                //
+                var selectedXAxisLabelY = showXAxisSection.frame.maxY
+                if self.showYAxisSelectedLabel == .top {
+                    selectedXAxisLabelY = sections.first?.padding.top ?? 0
+                } else if self.showYAxisSelectedLabel == .bottom {
+                    selectedXAxisLabelY = showXAxisSection.frame.maxY
+                }
+                //
+                self.selectedXAxisLabel?.frame = CGRect(x: x, y: selectedXAxisLabelY, width: size.width  + 6, height: self.labelSize.height)
                 
                 self.sightView?.center = CGPoint(x: hx, y: vy)
                 
@@ -650,6 +668,35 @@ open class CHKLineChartView: UIView {
         //回调给代理委托方法
         self.delegate?.kLineChart?(chart: self, didSelectAt: index, item: item)
         
+    }
+    
+    func setLastItemSelectedOnPanGesture() {
+        let index = self.datas.count - 1
+        self.selectedIndex = index
+        let item = self.datas[index]
+        
+        //显示分区的header标题
+        for (_, section) in self.sections.enumerated() {
+            if section.hidden {
+                continue
+            }
+            
+            if let titleString = self.delegate?.kLineChart?(chart: self,
+                                                            titleForHeaderInSection: section,
+                                                            index: index,
+                                                            item: self.datas[index]) {
+                //显示用户自定义的title
+                section.drawTitleForHeader(title: titleString)
+            } else {
+                //显示默认
+                section.drawTitle(index)
+            }
+        }
+        
+        
+        
+        //回调给代理委托方法
+        self.delegate?.kLineChart?(chart: self, didSelectAt: index, item: item)
     }
     
 }
@@ -1679,7 +1726,7 @@ extension CHKLineChartView: UIGestureRecognizerDelegate {
             //添加动力行为
             self.animator.addBehavior(decelerationBehavior)
             self.decelerationBehavior = decelerationBehavior
-
+            setLastItemSelectedOnPanGesture()
             
         default:
             break

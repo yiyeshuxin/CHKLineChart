@@ -64,7 +64,8 @@ open class CHKLineChartStyle {
     
     //显示y的位置，默认右边
     open var showYAxisLabel = CHYAxisShowPosition.right
-    
+    open var showYAxisSelectedLabel = CHYAxisSelectedLabelPosition.none
+    open var showXAxisSelectedLabel = CHXAxisSelectedLabelPosition.none
     /// 是否把y坐标内嵌到图表仲
     open var isInnerYAxis: Bool = false
     
